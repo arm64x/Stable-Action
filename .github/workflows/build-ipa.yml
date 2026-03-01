@@ -1,0 +1,58 @@
+name: Build Unsigned IPA
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build (no signing)
+        run: |
+          xcodebuild \
+            -project "Stable Action.xcodeproj" \
+            -scheme "Stable Action" \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/StableAction.xcarchive" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            PRODUCT_BUNDLE_IDENTIFIER="com.unsigned.stable-action" \
+            archive
+
+      - name: Package unsigned IPA
+        run: |
+          # Lấy .app từ archive
+          APP_PATH=$(find "$RUNNER_TEMP/StableAction.xcarchive" -name "*.app" | head -1)
+          
+          # Tạo cấu trúc Payload
+          mkdir -p "$RUNNER_TEMP/Payload"
+          cp -R "$APP_PATH" "$RUNNER_TEMP/Payload/"
+          
+          # Zip thành IPA
+          cd "$RUNNER_TEMP"
+          zip -r StableAction-unsigned.ipa Payload
+          
+          echo "IPA created at: $RUNNER_TEMP/StableAction-unsigned.ipa"
+          ls -lh "$RUNNER_TEMP/StableAction-unsigned.ipa"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StableAction-unsigned-ipa
+          path: ${{ runner.temp }}/StableAction-unsigned.ipa
+          retention-days: 30
