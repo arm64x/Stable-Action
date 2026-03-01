@@ -245,7 +245,7 @@ private struct VideoThumbnailView: View {
                     .overlay(Image(systemName: "video.fill").foregroundStyle(.white.opacity(0.5)))
             }
         }
-        .onChange(of: url) { loadThumbnail($1) }
+        .onChange(of: url) { newValue in loadThumbnail(newValue) }
         .onAppear { loadThumbnail(url) }
     }
 
