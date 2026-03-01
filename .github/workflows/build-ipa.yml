@@ -32,7 +32,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             IPHONEOS_DEPLOYMENT_TARGET=16.0 \
-            PRODUCT_BUNDLE_IDENTIFIER="com.unsigned.stable-action" \
+            PRODUCT_BUNDLE_IDENTIFIER="com.rudrashah.Stable-Action" \
             archive
 
       - name: Package unsigned IPA
